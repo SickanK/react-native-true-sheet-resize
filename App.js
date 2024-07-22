@@ -1,31 +1,26 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet';
 import { StatusBar } from 'expo-status-bar';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import { StyleSheet, Text, View, Button } from 'react-native';
 
 export default function App() {
   const sheet = useRef(null)
-  const scrollViewRef = useRef(null)
-  const [state, setState] = useState(null)
+  const [state, setState] = useState(false)
+  const presentRef = useRef(false)
 
   const presentTrue = () => {
-    setState(true)
+    presentRef.current = true
+    sheet.current?.present()
   }
 
   const presentFalse = () => {
-    setState(false)
+    presentRef.current = false
+    sheet.current?.present()
   }
 
   const dismiss = () => {
-    setState(null)
     sheet.current?.dismiss()
   }
-
-  useEffect(() => {
-    if (state !== null) {
-      sheet.current?.present()
-    }
-  }, [state])
 
   return (
     <>
@@ -37,16 +32,17 @@ export default function App() {
       </View>
       <TrueSheet
         ref={sheet}
-        sizes={['auto', "large"]}
+        sizes={state ? ["medium"] : ["large"]}
         cornerRadius={24}
-        scrollRef={scrollViewRef}
+        onPresent={() => {
+          console.log('present', presentRef.current)
+          setState(presentRef.current)
+        }}
         onDismiss={dismiss}
       >
-        <View>
-          <Button onPress={dismiss} title="Dismiss" />
-          {state === null ? <View /> : state === true ? <View style={styles.sheetLarge} />
-            : <View style={styles.sheetSmall} />}
-        </View>
+        <Button onPress={dismiss} title="Dismiss" />
+        {state === true ? <View style={styles.sheetLarge} />
+          : <View style={styles.sheetSmall} />}
       </TrueSheet>
     </>
   );
